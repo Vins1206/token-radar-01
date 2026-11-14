@@ -293,6 +293,20 @@ function actionFor(p: SnapshotProtocol, capital: number, chain: string): string 
   return `Deposit $${capital} of USDC into ${n} on ${chain} through its own app and keep the position open`;
 }
 
+/** The weekly qualifying action for a category: the repeat move that keeps a farm wallet eligible. */
+function weeklyFor(p: SnapshotProtocol, chain: string): string {
+  const c = (p.category ?? '').toLowerCase();
+  const n = p.name;
+  if (c.includes('lend') || c.includes('cdp') || c.includes('collateral')) return `top up the ${n} supply by a small amount or repay and re-borrow a slice, keeping utilisation under 40% of the limit on ${chain}`;
+  if (c.includes('dex') || c.includes('aggregator')) return `swap a small amount in both directions through ${n} and rebalance the liquidity position on ${chain}`;
+  if (c.includes('perpetual') || c.includes('derivative') || c.includes('basis')) return `open and close one small hedged position on ${n} (long spot, short perp of the same size) on ${chain}`;
+  if (c.includes('restak') || c.includes('staking')) return `stake a small top-up through ${n} and claim any staking reward into the same wallet on ${chain}`;
+  if (c.includes('bridge')) return `bridge a small amount through ${n} in the opposite direction and back, then use it once on ${chain}`;
+  if (c.includes('curator') || c.includes('allocator') || c.includes('yield')) return `add a small top-up to the ${n} vault and leave the combined shares untouched on ${chain}`;
+  if (c.includes('prediction')) return `take one small researched position in a liquid ${n} market and let the previous one settle`;
+  return `make one real deposit or withdrawal cycle in ${n} on ${chain}, sized like the first position, not dust`;
+}
+
 /** A protocol's farm plan: six concrete steps, each with its cost and its time, from its own record. */
 export function farmSteps(p: SnapshotProtocol, age: number | null): string[] {
   const chain = p.chains.length > 0 ? p.chains[0]! : 'its main chain';
@@ -303,10 +317,10 @@ export function farmSteps(p: SnapshotProtocol, age: number | null): string[] {
   const steps = [
     `Set up one fresh wallet for ${p.name} only, fund it on ${chain}, and reach the app from the protocol's verified profile, never from a search ad. Cost: about ${gasText} of gas for the first transaction. Time: 10 minutes.`,
     `${actionFor(p, capital, chain)}. Cost: $${capital} of capital plus about ${gasText} of gas. Time: 15 minutes to set up.`,
-    `Repeat one qualifying action every week (a deposit, a swap, a vote or a claim check) so the wallet shows a season of use, not a single day. Cost: about ${gasText} of gas a week, roughly $${(gas * Math.ceil(hold / 7)).toFixed(2)} across the ${hold}-day hold. Time: 10 minutes a week.`,
+    `Every week on the same weekday, ${weeklyFor(p, chain)}, so the wallet shows a season of use in ${p.name}, not a single day. Cost: about ${gasText} of gas a week, roughly $${(gas * Math.ceil(hold / 7)).toFixed(2)} across the ${hold}-day hold. Time: 10 minutes a week.`,
     `Hold the position for at least ${hold} days so the activity counts in more than one weekly snapshot, and do not split it across wallets. Cost: the $${capital} stays in the position for ${hold} days. Time: ${hold} days.`,
-    `Each Friday, open the protocol's own points or rewards page and claim only from the link that page publishes; never pay anyone to claim for you. Cost: nothing to check, about ${gasText} if a claim is live. Time: 5 minutes a week.`,
-    `Keep a farm log with the wallet, dates, amounts and transaction hashes, and set the exit rule now: unwind within a week of any token announcement unless the rules reward holding. Cost: nothing but the log. Time: 5 minutes.`,
+    `Each Friday, open ${p.name}'s own points or rewards page, compare its total against your farm log entry by entry, and claim only from the link that page publishes; never pay anyone to claim for you. Cost: nothing to check, about ${gasText} if a claim is live. Time: 5 minutes a week.`,
+    `Keep a farm log with the wallet, dates, amounts and transaction hashes, and set the exit rule now: unwind within a week of any ${p.name} token announcement unless the rules reward holding, and exit early if its TVL falls 30% from your entry week. Cost: nothing but the log. Time: 5 minutes.`,
   ];
   return steps.map((s) => (s.length > 600 ? `${s.slice(0, 596)}...` : s));
 }

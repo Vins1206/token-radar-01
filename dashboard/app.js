@@ -77,7 +77,13 @@
       '<div class="stat"><div class="n">' + R.watchlist_size + ' / ' + R.watchlist_size + '</div><div class="l">watchlist covered</div></div>' +
       '<div class="stat"><div class="n">' + R.early_size + '</div><div class="l">early, below the $50M floor</div></div>' +
       '<div class="stat"><div class="n">' + money(R.rows.length ? R.rows[0].implied_value_usd : 0) + '</div><div class="l">top implied value</div></div>' +
-      '</div>'
+      '</div>' +
+      '<div class="spots">' + R.rows.slice(0, 3).map(function (r) {
+        return '<div class="spot" data-slug="' + esc(r.slug) + '"><div class="rk">Farm first: rank #' + r.rank + '</div>' +
+          '<div class="nm">' + esc(r.name) + '</div><div class="vl">' + money(r.implied_value_usd) + ' <span class="mt">implied</span></div>' +
+          '<div class="mt">TVL ' + money(r.tvl_usd) + ' · 7d ' + (r.change_7d == null ? 'no reading' : (r.change_7d >= 0 ? '+' : '') + r.change_7d.toFixed(1) + '%') +
+          ' · readiness ' + r.readiness + '/100 · ' + esc(r.category || 'Uncategorized') + '</div></div>';
+      }).join('') + '</div>'
     );
   }
 
@@ -193,6 +199,9 @@
     main.querySelectorAll('tr.row').forEach(function (tr) {
       tr.addEventListener('click', function () { location.hash = 'p/' + tr.getAttribute('data-slug'); });
     });
+    main.querySelectorAll('.spot').forEach(function (el) {
+      el.addEventListener('click', function () { location.hash = 'p/' + el.getAttribute('data-slug'); });
+    });
   }
 
   // Re-render only the table body and count after a control change, keeping the controls' focus.
@@ -233,6 +242,10 @@
       ' <span class="badge">rank #' + r.rank + ' of ' + R.board_size + '</span></div></div>' +
       '<p class="sub">' + esc(r.category || 'Uncategorized') + ' on ' + esc(r.chains.join(', ') || 'its main chain') +
       '. This protocol records no token in the snapshot of ' + esc(R.as_of) + ', so the radar prices the launch it has not had yet.</p>' +
+      '<div class="verdict"><b>Why rank #' + r.rank + ', why now:</b> ' + esc(r.name) + ' holds ' + money(r.tvl_usd) + ' of TVL with ' +
+      (r.change_7d == null ? 'no 7-day reading, so momentum is priced neutral' : 'a 7-day move of ' + (r.change_7d >= 0 ? '+' : '') + r.change_7d.toFixed(1) + '%, so momentum is ' + (r.change_7d >= 3 ? 'actively building' : r.change_7d >= 0 ? 'steady, not fading' : 'cooling, which the model already discounts')) +
+      '; it has been tracked for ' + ageText(r.age_days) + ' with no token, and its ' + esc(r.category || 'Uncategorized') + ' peers price launches at ' +
+      m.peer_multiple.toFixed(3) + 'x TVL against a global median of ' + R.global_median.toFixed(3) + 'x. That mix, not its name, is what puts it at rank #' + r.rank + ' of ' + R.board_size + '.</div>' +
       '<div class="grid">' +
       '<div class="card"><h3>Implied value</h3><div class="big">' + money(r.implied_value_usd) + '</div><div class="cat">' + (r.implied_value_usd / r.tvl_usd).toFixed(2) + 'x its TVL, under model ' + esc(R.model_version) + '</div></div>' +
       '<div class="card"><h3>TVL</h3><div class="big">' + money(r.tvl_usd) + '</div><div class="cat">7-day change ' + (r.change_7d == null ? 'not reported' : r.change_7d.toFixed(1) + '%') + '</div></div>' +
@@ -249,6 +262,12 @@
       '<tr><td>Breadth multiplier (' + r.chains.length + (r.chains.length === 1 ? ' chain' : ' chains') + ')</td><td class="num">x ' + m.breadth_multiplier.toFixed(3) + '</td></tr>' +
       '<tr><td><b>Implied value</b></td><td class="num"><b>' + money(r.implied_value_usd) + '</b></td></tr>' +
       '</tbody></table></section>' +
+      '<section class="block"><h2>Why this rank, in plain terms</h2><ul class="why">' +
+      '<li><b>Scale:</b> ' + money(r.tvl_usd) + ' of TVL is real usage a launch would have to price; the model values it at ' + (r.implied_value_usd / r.tvl_usd).toFixed(2) + 'x TVL, so the rank follows the multiple below, not raw size alone.</li>' +
+      '<li><b>Peer pricing:</b> ' + m.peer_count + ' tokened ' + esc(r.category || 'Uncategorized') + ' protocols in this same snapshot set the ' + m.peer_multiple.toFixed(3) + 'x multiple (global median ' + R.global_median.toFixed(3) + 'x), shrunk toward that median so a thin category cannot inflate this row.</li>' +
+      '<li><b>Timing:</b> ' + (r.change_7d == null ? 'no 7-day TVL reading is reported, so the growth multiplier stays neutral at x ' + m.growth_multiplier.toFixed(3) : 'TVL moved ' + (r.change_7d >= 0 ? '+' : '') + r.change_7d.toFixed(1) + '% in the snapshot week, giving a growth multiplier of x ' + m.growth_multiplier.toFixed(3)) + '; ' + ageText(r.age_days) + ' tracked with no token gives a maturity multiplier of x ' + m.maturity_multiplier.toFixed(3) + ', and ' + r.chains.length + (r.chains.length === 1 ? ' chain gives' : ' chains give') + ' a breadth multiplier of x ' + m.breadth_multiplier.toFixed(3) + '.</li>' +
+      '<li><b>What would change the rank:</b> a token announcement ends the thesis (exit by the farm plan rule); a sustained TVL drop lowers the growth term next snapshot; a richer peer multiple for ' + esc(r.category || 'Uncategorized') + ' would lift every pre-token row in the category, not just this one.</li>' +
+      '</ul></section>' +
       '<section class="block"><h2>How to farm it</h2>' +
       '<p>Six steps, each with what it costs and how long it takes, written for this protocol\'s category and first chain (' + esc(r.chains[0] || 'its main chain') + ').</p>' +
       '<ol class="steps">' + steps + '</ol></section>' +
