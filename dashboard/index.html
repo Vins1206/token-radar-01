@@ -3,12 +3,54 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Token Launch Radar: pre-token protocols ranked by implied value</title>
+<title>Token Radar — pre-token protocols ranked by implied launch value</title>
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
-<a class="skip" href="#board">Skip to the board</a>
-<main id="board" tabindex="-1" aria-busy="true"></main>
+<header class="mast">
+  <div class="mast-in">
+    <p class="kicker">TOKEN RADAR · MODEL RADAR-2 · SNAPSHOT <span id="asOf">—</span></p>
+    <h1>Which pre-token protocol is worth farming next?</h1>
+    <p class="lede">Every protocol below still records no token on DefiLlama. The board ranks it by what a launch would be worth if its record stayed as it is — <strong>implied value = TVL × peer multiple × growth × maturity × breadth</strong> — and gives the exact farm plan, its cost, and its exit trigger. Token-bearing protocols are never rows; they are the peer evidence the multiples come from.</p>
+    <p class="stats" id="statsLine">Loading the board…</p>
+  </div>
+</header>
+
+<main>
+  <section class="spot" aria-label="Farm first">
+    <h2>Farm First — the top three</h2>
+    <p class="spot-sub">If you only farm three protocols this week, farm these. Each card states why it holds its rank and the first move.</p>
+    <div class="spot-grid" id="spotlight"></div>
+  </section>
+
+  <section class="board" aria-label="Ranked board">
+    <div class="controls">
+      <label>Search <input id="q" type="search" placeholder="name or slug"></label>
+      <label>Category <select id="cat"><option value="">All categories</option></select></label>
+      <label>Tier <select id="tier"><option value="">Watchlist + early</option><option value="watchlist">Watchlist only</option><option value="early">Early only</option></select></label>
+      <label>Sort <select id="sort"><option value="rank">By rank (implied value)</option><option value="tvl">By TVL</option><option value="growth">By 7-day growth</option><option value="readiness">By readiness</option></select></label>
+      <p class="count" id="count"></p>
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>Protocol</th><th>Category</th><th>TVL</th><th>7d</th><th>Implied value</th><th>×TVL</th><th>Ready</th><th>Verdict — why this rank, why now</th>
+      </tr></thead>
+      <tbody id="boardBody"></tbody>
+    </table>
+  </section>
+
+  <section class="detail" id="detail" hidden>
+    <button class="back" id="backBtn" type="button">← Back to the board</button>
+    <div id="detailBody"></div>
+  </section>
+
+  <section class="method">
+    <h2>How to read this board</h2>
+    <p><strong>Peer multiple</strong> is the median market-cap/TVL of token-bearing protocols in the same category, shrunk toward the global median with weight n/(n+4) and clamped to 0.03–2.50, so a thin category cannot invent a fantasy multiple. <strong>Growth</strong> adds 30% of the clamped seven-day TVL change (−50% to +100%). <strong>Maturity</strong> runs from 0.72 to 1.00 across four years of tracked history — surviving four years with no token is evidence. <strong>Breadth</strong> adds 1.5% per extra chain, up to six. <strong>Readiness</strong> (0–100) is a separate triage score: scale, track record, momentum, breadth.</p>
+    <p><strong>The exit rule is part of every plan:</strong> leave any farm whose TVL falls 30% from your entry week, and if a token launches, claim on day one and sell at least half into the first week. A radar that never tells you to leave is a trap, not a tool.</p>
+    <p class="fine" id="sourceLine"></p>
+  </section>
+</main>
 <script src="../data.js"></script>
 <script src="app.js"></script>
 </body>
