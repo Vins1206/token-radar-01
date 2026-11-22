@@ -1,4 +1,7 @@
-// Token Radar — valuation model "radar-2".
+// Token Radar — valuation model "radar-2.2" (radar-2.1 recalibrated the
+// peer multiples; 2.2 keeps that calibration and writes each farm plan
+// for its own protocol: six steps carrying its TVL, momentum, age,
+// chains and readiness, plus an eight-week timeline).
 //
 // Question the board answers: if a protocol that still records no token
 // issued one today, what would that token plausibly be worth, and what
@@ -313,16 +316,19 @@ function chainCost(chains: string[]): string {
 }
 
 /**
- * A concrete farm plan, specific to this protocol's own numbers, not
- * just its category. Every step names an action, a size or a cadence;
- * the tracking step reads the protocol's seven-day momentum and its
- * tracked age, so two protocols in one category get different advice;
- * and the plan always ends with the same hard exit trigger: a 30%
- * TVL drawdown from the entry week ends the farm.
+ * A farm plan written for one protocol, not its category. Six steps:
+ * an entry sized to the protocol's own age, a core action sized to its
+ * seven-day momentum, a second position that names its second chain
+ * (or flags single-chain concentration), a weekly tracking step that
+ * states the protocol's momentum, age and readiness, an eight-week
+ * timeline, and the hard exit trigger. Every step carries the
+ * protocol's own numbers — its TVL, its 7-day change, its tracked age,
+ * its chains — so two protocols in one category get different plans.
  */
-export function farmSteps(p: Protocol, tier: string, ageDays: number | null): string[] {
+export function farmSteps(p: Protocol, tier: string, ageDays: number | null, readiness: number): string[] {
   const kind = farmKind(p.category ?? '');
   const mainChain = p.chains[0] ?? 'its main chain';
+  const secondChain = p.chains[1] ?? null;
   const cost = chainCost(p.chains);
   const size = tier === 'watchlist' ? '1-3% of the capital you farm with' : '0.25-0.5% of the capital you farm with, a test size';
   const momentumNote =
@@ -341,56 +347,90 @@ export function farmSteps(p: Protocol, tier: string, ageDays: number | null): st
         : ageDays < 180
           ? `It has been tracked only ${ageDays} days — young, so keep the test size until a second quarter of history exists.`
           : `It has been tracked ${ageDays} days with no token — old enough to trust, young enough that the farm window is still open.`;
+  const entrySizing =
+    ageDays === null
+      ? 'No tracking start date is recorded, so start at the small end of that range.'
+      : ageDays < 180
+        ? `Only ${ageDays} days tracked so far, so start at the small end of that range.`
+        : ageDays >= 730
+          ? `The ${ageDays}-day track record supports the full size.`
+          : `With ${ageDays} days tracked, the middle of that range is right.`;
+  const momentumAction =
+    p.change_7d === null
+      ? 'No seven-day change is reported, so run the plan at the normal cadence and let the weekly track decide.'
+      : p.change_7d >= 20
+        ? `TVL is up ${p.change_7d.toFixed(1)}% in seven days — momentum is live, so press the plan this week.`
+        : p.change_7d <= -15
+          ? `TVL is down ${Math.abs(p.change_7d).toFixed(1)}% in seven days — press pause on adding size until two flat weeks in a row.`
+          : `TVL moved ${p.change_7d >= 0 ? '+' : ''}${p.change_7d.toFixed(1)}% in seven days — steady, so run the plan at the normal cadence.`;
+  const readinessNote =
+    readiness >= 75
+      ? `Readiness ${readiness}/100 puts it in the top quarter of the board — farm it before lower-readiness rows.`
+      : readiness >= 55
+        ? `Readiness ${readiness}/100 puts it in the upper half of the board — a solid farm, behind the top quarter.`
+        : readiness >= 35
+          ? `Readiness ${readiness}/100 puts it mid-board — farm it after the higher-readiness rows.`
+          : `Readiness ${readiness}/100 puts it in the lower third — farm it only after the higher-readiness rows are covered.`;
+  const chainNote =
+    secondChain !== null
+      ? `It also runs on ${secondChain}, so the second position below goes there, not on ${mainChain}.`
+      : `It runs on ${mainChain} alone, so a chain outage is your concentration risk — keep the position small enough to exit in one transaction.`;
   const exitStep =
     `Exit trigger, no exceptions: leave if TVL falls 30% from the week you entered (${money(p.tvl_usd)} today, so below ${money(p.tvl_usd * 0.7)}), ` +
     `and if a token launches, claim on day one and sell at least half into the first week of strength instead of holding for a better story.`;
   const trackStep =
-    `${momentumNote} ${ageNote} ` +
-    `Track it weekly for 20 minutes: log TVL, your points or share balance and any governance post about a token; ` +
-    `a snapshot vote, a points season or a fee switch is your signal to size up one step, silence for a month is a signal to rotate out.`;
+    `${momentumNote} ${ageNote} ${readinessNote} ` +
+    `Track it weekly for 20 minutes: log TVL, points balance and any token governance post; a snapshot vote or fee switch means size up one step, a month of silence means rotate out.`;
+  const timelineStep =
+    `Eight-week timeline for ${p.name}: week 1, place the entry above at ${size}; week 4, top up only if TVL is still above ${money(p.tvl_usd)} and the seven-day change is still positive; week 8, claim any points or rewards, log the position, and either hold for the next snapshot window or rotate the capital to a higher-readiness row.`;
   if (kind === 'lending') {
     return [
-      `Open the app on ${mainChain} and supply a blue-chip collateral asset (ETH or a major stablecoin) worth ${size}; the first deposit takes about 15 minutes and costs ${cost}.`,
-      `Borrow 25-35% of your supplied value in the same stablecoin and re-supply it once; this loop is the activity lending farms reward, and it keeps liquidation risk low at that ratio.`,
-      `Repay and re-borrow on a two-week cadence for at least eight weeks so your history spans more than one snapshot window; each touch costs a few dollars of gas at most off mainnet.`,
+      `Open ${p.name} on ${mainChain} and supply a blue-chip collateral asset (ETH or a major stablecoin) worth ${size}; the first deposit takes about 15 minutes and costs ${cost}. ${entrySizing}`,
+      `Borrow 25-35% of your supplied value in the same stablecoin and re-supply it once; this loop is the activity lending farms reward, and it keeps liquidation risk low at that ratio. ${momentumAction}`,
+      `Repay and re-borrow on a two-week cadence for at least eight weeks so your history spans more than one snapshot window; each touch costs a few dollars of gas at most off mainnet. ${chainNote}`,
       trackStep,
+      timelineStep,
       exitStep,
     ];
   }
   if (kind === 'dex') {
     return [
-      `Connect on ${mainChain} and make five real swaps of $100-$500 across two different pairs in week one; organic-looking flow, not one giant trade, is what DEX farms count, for ${cost}.`,
-      `Add a concentrated liquidity position in the deepest pair with ${size}, set a range you can check twice a week, and leave it for at least six weeks.`,
-      `Claim every fee and reward weekly and restake half; screenshot your position each Sunday so your points history is provable if a retroactive drop asks for it.`,
+      `Connect to ${p.name} on ${mainChain} and make five real swaps of $100-$500 across two different pairs in week one; organic-looking flow, not one giant trade, is what DEX farms count, for ${cost}. ${entrySizing}`,
+      `Add a concentrated liquidity position in the deepest pair with ${size}, set a range you can check twice a week, and leave it for at least six weeks. ${momentumAction}`,
+      `Claim every fee and reward weekly and restake half; screenshot your position each Sunday so your points history is provable if a retroactive drop asks for it. ${chainNote}`,
       trackStep,
+      timelineStep,
       exitStep,
     ];
   }
   if (kind === 'perps') {
     return [
-      `Deposit collateral worth ${size} on ${mainChain} and open one small hedged position (long spot elsewhere, short here) so market risk stays near zero while volume accrues; setup is about 20 minutes, costing ${cost}.`,
-      `Trade to a steady cadence of two to three sessions a week for eight weeks rather than one burst; perps points programs weight consistent weeks over single-day volume.`,
-      `Keep margin above 3x the maintenance level at all times and withdraw profits monthly; a liquidation erases the farm history you are building.`,
+      `Deposit collateral worth ${size} on ${mainChain} into ${p.name} and open one small hedged position (long spot elsewhere, short here) so market risk stays near zero while volume accrues; setup is about 20 minutes, costing ${cost}. ${entrySizing}`,
+      `Trade to a steady cadence of two to three sessions a week for eight weeks rather than one burst; perps points programs weight consistent weeks over single-day volume. ${momentumAction}`,
+      `Keep margin above 3x the maintenance level at all times and withdraw profits monthly; a liquidation erases the farm history you are building. ${chainNote}`,
       trackStep,
+      timelineStep,
       exitStep,
     ];
   }
   if (kind === 'yield') {
     return [
-      `Deposit a major stablecoin or ETH worth ${size} into the flagship vault on ${mainChain}; one deposit, about 10 minutes, costing ${cost}, starts the position.`,
-      `Hold for at least eight consecutive weeks without withdrawing: curator and allocator vaults weight time-in-vault heavily when they snapshot depositors.`,
+      `Deposit a major stablecoin or ETH worth ${size} into the flagship vault of ${p.name} on ${mainChain}; one deposit, about 10 minutes, costing ${cost}, starts the position. ${entrySizing}`,
+      `Hold for at least eight consecutive weeks without withdrawing: curator and allocator vaults weight time-in-vault heavily when they snapshot depositors. ${momentumAction}`,
       p.chains.length > 1
         ? `Split a second, smaller deposit onto ${p.chains[1]} as well — it runs on ${p.chains.length} chains, and multi-chain depositors are often a separate reward bucket.`
         : `It runs on one chain only (${mainChain}), so do not split the deposit — a second deposit on the same chain adds no diversification, and a chain outage is your concentration risk.`,
       trackStep,
+      timelineStep,
       exitStep,
     ];
   }
   return [
-    `Use the protocol's core product on ${mainChain} with real funds worth ${size} in week one: one genuine session of 15-30 minutes, costing ${cost}, beats ten empty wallet connects.`,
-    `Repeat the core action weekly for at least eight weeks and vary the amounts slightly; consistency across snapshots is the pattern retroactive rewards are built on.`,
-    `Join its governance forum or Discord with the same wallet linked, vote on the first proposal you find, and keep the wallet active until a launch is announced.`,
+    `Use ${p.name}'s core product on ${mainChain} with real funds worth ${size} in week one: one genuine session of 15-30 minutes, costing ${cost}, beats ten empty wallet connects. ${entrySizing}`,
+    `Repeat the core action weekly for at least eight weeks and vary the amounts slightly; consistency across snapshots is the pattern retroactive rewards are built on. ${momentumAction}`,
+    `Join its governance forum or Discord with the same wallet linked, vote on the first proposal you find, and keep the wallet active until a launch is announced. ${chainNote}`,
     trackStep,
+    timelineStep,
     exitStep,
   ];
 }
@@ -447,7 +487,7 @@ export function buildRadar(snapshot: Snapshot): { board: BoardRow[]; radar: Rada
       name: s.p.name,
       rank,
       implied_value_usd: s.implied,
-      farm_steps: farmSteps(s.p, s.tier, s.age),
+      farm_steps: farmSteps(s.p, s.tier, s.age, readiness),
       category: s.category,
       chains: s.p.chains,
       tvl_usd: s.p.tvl_usd,
@@ -483,7 +523,7 @@ export function buildRadar(snapshot: Snapshot): { board: BoardRow[]; radar: Rada
 
   const liveSize = snapshot.protocols.filter((p) => !recordsNoToken(p)).length;
   const radar: Radar = {
-    model: 'radar-2.1',
+    model: 'radar-2.2',
     as_of: snapshot.as_of,
     source: snapshot.source,
     floor_usd: snapshot.floor_usd,

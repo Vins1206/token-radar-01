@@ -23,13 +23,14 @@
   function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
+  // Board rows carry the compact factor line (all four factors, one
+  // line); the detail view carries the full why-this-rank sentence.
   function shortWhy(r) {
     var mult = (r.implied_value_usd / r.tvl_usd).toFixed(2);
-    return 'Implied ' + fmt(r.implied_value_usd) + ' is ' + mult + 'x its ' + fmt(r.tvl_usd) +
-      ' TVL: ' + r.category + ' peer multiple ' + r.peer_multiple.toFixed(2) + ' (' + r.peer_count +
-      ' peer' + (r.peer_count === 1 ? '' : 's') + ', shrunk to the global median), growth x' +
-      r.growth_factor.toFixed(2) + ', maturity x' + r.maturity_factor.toFixed(2) +
-      ', breadth x' + r.breadth_factor.toFixed(2) + '.';
+    return mult + 'x its ' + fmt(r.tvl_usd) + ' TVL · peer ' + r.peer_multiple.toFixed(2) +
+      ' (' + r.peer_count + ' peer' + (r.peer_count === 1 ? '' : 's') + ') · growth x' +
+      r.growth_factor.toFixed(2) + ' · maturity x' + r.maturity_factor.toFixed(2) +
+      ' · breadth x' + r.breadth_factor.toFixed(2);
   }
 
   document.getElementById('asOf').textContent = D.as_of;

@@ -2,14 +2,19 @@
 [![rank](https://make.fun/badge/token-radar-01/Vins1206/token-radar-01/rank.svg)](https://make.fun/bounty/token-radar-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=token-radar-01)
 [![reward](https://make.fun/badge/token-radar-01/Vins1206/token-radar-01/reward.svg)](https://make.fun/bounty/token-radar-01?utm_source=github&utm_medium=readme&utm_campaign=token-radar-01)
 
-# Token Radar — radar-2
+# Token Radar — radar-2.2
 
 A token launch radar for make.fun's token-radar-01 bounty. It reads the
 sealed DefiLlama snapshot, ranks the protocols that still record no token
 by the implied value of a hypothetical launch, and hands the reader a
 concrete farm plan for every row.
 
-## The model (radar-2.1)
+## The model (radar-2.2)
+
+Every farm plan is written for its own protocol: six steps carrying the
+protocol's TVL, seven-day momentum, tracked age, chains and readiness,
+plus an eight-week timeline — so two protocols in one category get
+different plans.
 
 ```
 implied value = TVL x peer multiple x growth x maturity x breadth
