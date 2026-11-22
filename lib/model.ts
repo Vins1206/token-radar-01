@@ -11,7 +11,12 @@
 //
 //   peer multiple  median market-cap / TVL of token-bearing protocols in
 //                  the same category, shrunk toward the global median
-//                  with weight n / (n + 4), clamped to [0.03, 2.50].
+//                  with weight n / (n + 8), clamped to [0.03, 2.50].
+//                  Every peer ratio is first capped at the 90th
+//                  percentile of all token-bearing protocols: one peer
+//                  with a 400x ratio must never set a category's
+//                  multiple on its own (that exact flaw put a
+//                  single-peer category at the 2.50 clamp in v3).
 //   growth         1 + 0.30 x clamp(change_7d, -50, +100) / 100; a
 //                  protocol with no reported change scores a neutral 1.
 //   maturity       0.72 + 0.28 x min(age_days, 1460) / 1460, so a
@@ -79,14 +84,17 @@ export interface Radar {
   live_size: number;
   board_size: number;
   global_multiple: number;
+  peer_cap: number;
+  growth_weight: number;
   rows: BoardRow[];
 }
 
 const BOARD_TARGET = 178;
-const SHRINK_K = 4;
+const SHRINK_K = 8;
 const MULT_FLOOR = 0.03;
 const MULT_CAP = 2.5;
-const GROWTH_WEIGHT = 0.3;
+const GROWTH_WEIGHT = 0.4;
+const PEER_WINSOR_QUANTILE = 0.9;
 const MATURITY_FLOOR = 0.72;
 const MATURITY_SPAN_YEARS = 4;
 const BREADTH_PER_CHAIN = 0.015;
@@ -168,21 +176,36 @@ export function breadthFactor(chainCount: number): number {
 
 interface PeerStats {
   globalMultiple: number;
+  winsorCap: number;
   byCategory: Map<string, { multiple: number; count: number }>;
 }
 
-/** Median mcap/TVL per category, shrunk toward the global median. */
+/**
+ * Median mcap/TVL per category, shrunk toward the global median.
+ *
+ * Two robustness rules, both computed from the snapshot itself: every
+ * peer ratio is capped at the 90th percentile of all peer ratios
+ * (winsorisation), and the shrink weight is n / (n + 8), so a category
+ * with one or two peers borrows almost the whole global median. Without
+ * the cap, a single peer at 400x TVL drags its whole category to the
+ * 2.50 clamp and invents a top-five rank out of one data point.
+ */
 export function peerMultiples(protocols: Protocol[]): PeerStats {
-  const ratiosByCategory = new Map<string, number[]>();
-  const allRatios: number[] = [];
+  const rawRatios: { category: string; ratio: number }[] = [];
   for (const p of protocols) {
     if (p.mcap_usd === null || p.mcap_usd <= 0 || p.tvl_usd <= 0) continue;
-    const ratio = p.mcap_usd / p.tvl_usd;
-    allRatios.push(ratio);
-    const key = p.category ?? 'Uncategorised';
-    const bucket = ratiosByCategory.get(key);
-    if (bucket) bucket.push(ratio);
-    else ratiosByCategory.set(key, [ratio]);
+    rawRatios.push({ category: p.category ?? 'Uncategorised', ratio: p.mcap_usd / p.tvl_usd });
+  }
+  const sorted = rawRatios.map((r) => r.ratio).sort((a, b) => a - b);
+  const winsorCap = sorted[Math.floor(sorted.length * PEER_WINSOR_QUANTILE)] ?? 0;
+  const ratiosByCategory = new Map<string, number[]>();
+  const allRatios: number[] = [];
+  for (const { category, ratio } of rawRatios) {
+    const capped = Math.min(ratio, winsorCap);
+    allRatios.push(capped);
+    const bucket = ratiosByCategory.get(category);
+    if (bucket) bucket.push(capped);
+    else ratiosByCategory.set(category, [capped]);
   }
   const globalMultiple = median(allRatios);
   const byCategory = new Map<string, { multiple: number; count: number }>();
@@ -192,7 +215,7 @@ export function peerMultiples(protocols: Protocol[]): PeerStats {
     const shrunk = weight * median(ratios) + (1 - weight) * globalMultiple;
     byCategory.set(category, { multiple: clamp(shrunk, MULT_FLOOR, MULT_CAP), count: n });
   }
-  return { globalMultiple, byCategory };
+  return { globalMultiple, winsorCap, byCategory };
 }
 
 /**
@@ -255,7 +278,8 @@ function whyRank(row: {
     `x ${row.multiple.toFixed(2)} peer multiple (median mcap/TVL of ${row.peerCount} token-bearing ${row.category} peer${row.peerCount === 1 ? '' : 's'}, shrunk to the global median) ` +
     `x ${row.growth.toFixed(2)} growth (${growthText(row.change7d)}) x ${row.maturity.toFixed(2)} maturity (${ageText}) ` +
     `x ${row.breadth.toFixed(3)} breadth (${row.chains} chain${row.chains === 1 ? '' : 's'}). ` +
-    `Readiness ${row.readiness}/100. Tier: ${row.tier === 'watchlist' ? 'watchlist, at or above the $50M floor' : 'early candidate below the floor, kept because the radar exists to find launches early'}. ` +
+    `Readiness ${row.readiness}/100. Peer evidence is thin where it is thin: every peer ratio is capped at the 90th percentile of all token-bearing protocols and shrunk with weight n/(n+8) toward the global median, so one outlier peer cannot set this multiple. ` +
+    `Tier: ${row.tier === 'watchlist' ? 'watchlist, at or above the $50M floor' : 'early candidate below the floor, kept because the radar exists to find launches early'}. ` +
     `Why now: the record is already large and still token-free, so the farm window is open today and closes the day a token launches.`
   );
 }
@@ -289,19 +313,39 @@ function chainCost(chains: string[]): string {
 }
 
 /**
- * A concrete, category-specific farm plan. Every step names an action, a
- * size or a cadence, and the plan always ends with the same hard exit
- * trigger: a 30% TVL drawdown from the entry week ends the farm.
+ * A concrete farm plan, specific to this protocol's own numbers, not
+ * just its category. Every step names an action, a size or a cadence;
+ * the tracking step reads the protocol's seven-day momentum and its
+ * tracked age, so two protocols in one category get different advice;
+ * and the plan always ends with the same hard exit trigger: a 30%
+ * TVL drawdown from the entry week ends the farm.
  */
-export function farmSteps(p: Protocol, tier: string): string[] {
+export function farmSteps(p: Protocol, tier: string, ageDays: number | null): string[] {
   const kind = farmKind(p.category ?? '');
   const mainChain = p.chains[0] ?? 'its main chain';
   const cost = chainCost(p.chains);
   const size = tier === 'watchlist' ? '1-3% of the capital you farm with' : '0.25-0.5% of the capital you farm with, a test size';
+  const momentumNote =
+    p.change_7d === null
+      ? 'No seven-day change is reported, so size on the TVL and track record alone.'
+      : p.change_7d >= 20
+        ? `Momentum is live: TVL is up ${p.change_7d.toFixed(1)}% in seven days, so enter at full size this week while the window is open.`
+        : p.change_7d <= -15
+          ? `TVL is down ${Math.abs(p.change_7d).toFixed(1)}% in seven days — enter at half size and re-check in seven days before adding anything.`
+          : `TVL moved ${p.change_7d >= 0 ? '+' : ''}${p.change_7d.toFixed(1)}% in seven days — steady, not a spike, so a normal-size entry is fine.`;
+  const ageNote =
+    ageDays === null
+      ? 'No tracking start date is recorded, so treat the age as unproven.'
+      : ageDays >= 730
+        ? `It has been tracked ${ageDays} days with no token — a long clean record, which is why the maturity factor is near its cap.`
+        : ageDays < 180
+          ? `It has been tracked only ${ageDays} days — young, so keep the test size until a second quarter of history exists.`
+          : `It has been tracked ${ageDays} days with no token — old enough to trust, young enough that the farm window is still open.`;
   const exitStep =
     `Exit trigger, no exceptions: leave if TVL falls 30% from the week you entered (${money(p.tvl_usd)} today, so below ${money(p.tvl_usd * 0.7)}), ` +
     `and if a token launches, claim on day one and sell at least half into the first week of strength instead of holding for a better story.`;
   const trackStep =
+    `${momentumNote} ${ageNote} ` +
     `Track it weekly for 20 minutes: log TVL, your points or share balance and any governance post about a token; ` +
     `a snapshot vote, a points season or a fee switch is your signal to size up one step, silence for a month is a signal to rotate out.`;
   if (kind === 'lending') {
@@ -335,7 +379,9 @@ export function farmSteps(p: Protocol, tier: string): string[] {
     return [
       `Deposit a major stablecoin or ETH worth ${size} into the flagship vault on ${mainChain}; one deposit, about 10 minutes, costing ${cost}, starts the position.`,
       `Hold for at least eight consecutive weeks without withdrawing: curator and allocator vaults weight time-in-vault heavily when they snapshot depositors.`,
-      `Split a second, smaller deposit across one more chain it runs on (${p.chains.slice(0, 3).join(', ') || mainChain}) if gas is cheap; multi-chain depositors are often a separate reward bucket.`,
+      p.chains.length > 1
+        ? `Split a second, smaller deposit onto ${p.chains[1]} as well — it runs on ${p.chains.length} chains, and multi-chain depositors are often a separate reward bucket.`
+        : `It runs on one chain only (${mainChain}), so do not split the deposit — a second deposit on the same chain adds no diversification, and a chain outage is your concentration risk.`,
       trackStep,
       exitStep,
     ];
@@ -401,7 +447,7 @@ export function buildRadar(snapshot: Snapshot): { board: BoardRow[]; radar: Rada
       name: s.p.name,
       rank,
       implied_value_usd: s.implied,
-      farm_steps: farmSteps(s.p, s.tier),
+      farm_steps: farmSteps(s.p, s.tier, s.age),
       category: s.category,
       chains: s.p.chains,
       tvl_usd: s.p.tvl_usd,
@@ -437,7 +483,7 @@ export function buildRadar(snapshot: Snapshot): { board: BoardRow[]; radar: Rada
 
   const liveSize = snapshot.protocols.filter((p) => !recordsNoToken(p)).length;
   const radar: Radar = {
-    model: 'radar-2',
+    model: 'radar-2.1',
     as_of: snapshot.as_of,
     source: snapshot.source,
     floor_usd: snapshot.floor_usd,
@@ -447,6 +493,8 @@ export function buildRadar(snapshot: Snapshot): { board: BoardRow[]; radar: Rada
     live_size: liveSize,
     board_size: board.length,
     global_multiple: Number(peers.globalMultiple.toFixed(4)),
+    peer_cap: Number(peers.winsorCap.toFixed(4)),
+    growth_weight: GROWTH_WEIGHT,
     rows: board,
   };
   return { board, radar };

@@ -5,7 +5,7 @@ sealed DefiLlama snapshot, ranks the protocols that still record no token
 by the implied value of a hypothetical launch, and hands the reader a
 concrete farm plan for every row.
 
-## The model
+## The model (radar-2.1)
 
 ```
 implied value = TVL x peer multiple x growth x maturity x breadth
@@ -13,8 +13,10 @@ implied value = TVL x peer multiple x growth x maturity x breadth
 
 - **Peer multiple** — median market-cap/TVL of token-bearing protocols in
   the same category, shrunk toward the global median with weight
-  n/(n+4), clamped to 0.03–2.50.
-- **Growth** — 1 + 0.30 × clamp(7-day TVL change, −50%, +100%); a missing
+  n/(n+8), clamped to 0.03–2.50. Every peer ratio is first capped at
+  the 90th percentile of all token-bearing protocols, so one outlier
+  peer cannot set a category's multiple.
+- **Growth** — 1 + 0.40 × clamp(7-day TVL change, −50%, +100%); a missing
   change scores a neutral 1.
 - **Maturity** — 0.72 to 1.00 across four years of tracked, token-free
   history.
