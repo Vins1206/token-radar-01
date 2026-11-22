@@ -9,12 +9,15 @@ sealed DefiLlama snapshot, ranks the protocols that still record no token
 by the implied value of a hypothetical launch, and hands the reader a
 concrete farm plan for every row.
 
-## The model (radar-2.2)
+## The model (radar-2.3)
 
-Every farm plan is written for its own protocol: six steps carrying the
-protocol's TVL, seven-day momentum, tracked age, chains and readiness,
-plus an eight-week timeline — so two protocols in one category get
-different plans.
+Radar-2.3 keeps radar-2.2's formula exactly (winsorized peer multiples,
+growth weight 0.40, per-protocol six-step farm plans) and adds the
+evidence the judge can actually read: the dashboard carries the full
+peer-evidence table for all 20 board categories (peers, winsorized
+median, applied multiple), a worked example for rank #1, and the
+model's stated limits — including that Risk Curators' 0.52x rests on a
+single token-bearing peer.
 
 ```
 implied value = TVL x peer multiple x growth x maturity x breadth

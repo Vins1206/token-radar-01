@@ -9,7 +9,7 @@
 <body>
 <header class="mast">
   <div class="mast-in">
-    <p class="kicker">TOKEN RADAR · MODEL RADAR-2.2 · SNAPSHOT <span id="asOf">—</span></p>
+    <p class="kicker">TOKEN RADAR · MODEL RADAR-2.3 · SNAPSHOT <span id="asOf">—</span></p>
     <h1>Which pre-token protocol is worth farming next?</h1>
     <p class="lede">Every protocol below still records no token on DefiLlama. The board ranks it by what a launch would be worth if its record stayed as it is — <strong>implied value = TVL × peer multiple × growth × maturity × breadth</strong> — and gives the exact farm plan, its cost, and its exit trigger. Token-bearing protocols are never rows; they are the peer evidence the multiples come from.</p>
     <p class="stats" id="statsLine">Loading the board…</p>
@@ -39,6 +39,37 @@
     </table>
   </section>
 
+  <section class="evidence" aria-label="Peer evidence">
+    <h2>Peer evidence behind the multiples</h2>
+    <p>The multiples are not asserted — they are computed from the 416 token-bearing protocols in the sealed snapshot, the same data the board is built from. Each category below shows how many token-bearing peers it has, the winsorized median of their market-cap/TVL, and the multiple actually applied after shrinking toward the global median of 0.21x. A category with one peer is shrunk hardest (weight 1/9); a category with fifteen peers keeps most of its own median.</p>
+    <table>
+      <thead><tr><th>Category</th><th>Token-bearing peers</th><th>Category median (winsorized)</th><th>Applied multiple</th><th>Board rows</th></tr></thead>
+      <tbody>
+<tr><td>Derivatives</td><td>2</td><td>2.16x</td><td>0.60x</td><td>11</td></tr>
+<tr><td>Cross Chain Bridge</td><td>4</td><td>1.22x</td><td>0.55x</td><td>1</td></tr>
+<tr><td>Chain</td><td>1</td><td>2.97x</td><td>0.52x</td><td>4</td></tr>
+<tr><td>Prediction Market</td><td>1</td><td>2.97x</td><td>0.52x</td><td>2</td></tr>
+<tr><td>Risk Curators</td><td>1</td><td>2.97x</td><td>0.52x</td><td>30</td></tr>
+<tr><td>Basis Trading</td><td>7</td><td>0.65x</td><td>0.42x</td><td>8</td></tr>
+<tr><td>Dexs</td><td>11</td><td>0.34x</td><td>0.29x</td><td>18</td></tr>
+<tr><td>RWA</td><td>9</td><td>0.27x</td><td>0.25x</td><td>15</td></tr>
+<tr><td>Leveraged Farming</td><td>1</td><td>0.17x</td><td>0.21x</td><td>2</td></tr>
+<tr><td>Payments</td><td>2</td><td>0.18x</td><td>0.21x</td><td>1</td></tr>
+<tr><td>Yield</td><td>9</td><td>0.19x</td><td>0.20x</td><td>12</td></tr>
+<tr><td>CDP</td><td>3</td><td>0.17x</td><td>0.20x</td><td>6</td></tr>
+<tr><td>Indexes</td><td>3</td><td>0.15x</td><td>0.20x</td><td>1</td></tr>
+<tr><td>Dual-Token Stablecoin</td><td>1</td><td>0.03x</td><td>0.19x</td><td>2</td></tr>
+<tr><td>Yield Aggregator</td><td>4</td><td>0.15x</td><td>0.19x</td><td>7</td></tr>
+<tr><td>Liquidity Manager</td><td>1</td><td>0.02x</td><td>0.19x</td><td>3</td></tr>
+<tr><td>Restaking</td><td>2</td><td>0.02x</td><td>0.18x</td><td>2</td></tr>
+<tr><td>Onchain Capital Allocator</td><td>2</td><td>0.01x</td><td>0.17x</td><td>18</td></tr>
+<tr><td>Staking Pool</td><td>2</td><td>0.00x</td><td>0.17x</td><td>3</td></tr>
+<tr><td>Lending</td><td>15</td><td>0.13x</td><td>0.16x</td><td>15</td></tr>
+      </tbody>
+    </table>
+    <p class="fine">Read the table against the board: the applied multiple is the number every row in that category multiplies its TVL by, before growth, maturity and breadth. Where the median and the applied multiple differ most — Chain, Prediction Market, Risk Curators — the shrink is doing the work: one peer, capped at 2.97x, pulled 8/9 of the way toward the global 0.21x.</p>
+  </section>
+
   <section class="detail" id="detail" hidden>
     <button class="back" id="backBtn" type="button">← Back to the board</button>
     <div id="detailBody"></div>
@@ -46,7 +77,9 @@
 
   <section class="method">
     <h2>How to read this board</h2>
-    <p><strong>Peer multiple</strong> is the median market-cap/TVL of token-bearing protocols in the same category, shrunk toward the global median with weight n/(n+8) and clamped to 0.03–2.50 — and every peer ratio is first capped at the 90th percentile of all token-bearing protocols, so one outlier peer (a single protocol once traded at 400× its TVL) cannot set a whole category's multiple. <strong>Growth</strong> adds 40% of the clamped seven-day TVL change (−50% to +100%), so a fast grower can outrank a stagnant giant. <strong>Maturity</strong> runs from 0.72 to 1.00 across four years of tracked history — surviving four years with no token is evidence. <strong>Breadth</strong> adds 1.5% per extra chain, up to six. <strong>Readiness</strong> (0–100) is a separate triage score: scale, track record, momentum, breadth. <strong>Farm plans</strong> are written per protocol, not per category: six steps that name the protocol's own TVL, seven-day momentum, tracked age, chains and readiness, with an eight-week timeline and the same 30% exit trigger.</p>
+    <p><strong>How an implied value is made, in four steps.</strong> (1) <strong>Peer multiple:</strong> take every token-bearing protocol in the same category, divide its market cap by its TVL, cap each ratio at the 90th percentile of all token-bearing protocols (2.97x in this snapshot — one protocol once traded at 400x its TVL, and it must not set a category), take the median, then shrink it toward the global median of 0.21x with weight n/(n+8), and clamp the result to 0.03–2.50. A category with one peer keeps only 1/9 of its own median; a category with fifteen peers keeps 15/23. (2) <strong>Growth:</strong> add 40% of the clamped seven-day TVL change (−50% to +100%), so a fast grower can outrank a stagnant giant. (3) <strong>Maturity:</strong> 0.72 to 1.00 across four years of tracked history — surviving four years with no token is evidence. (4) <strong>Breadth:</strong> 1.5% per extra chain, up to six. Multiply the four: implied value = TVL × peer × growth × maturity × breadth. <strong>Readiness</strong> (0–100) is a separate triage score: scale, track record, momentum, breadth. <strong>Farm plans</strong> are written per protocol, not per category: six steps that name the protocol's own TVL, seven-day momentum, tracked age, chains and readiness, with an eight-week timeline and the same 30% exit trigger.</p>
+    <p><strong>Worked example — rank #1, Steakhouse Financial.</strong> TVL $2.75B × peer 0.52 (Risk Curators: one token-bearing peer, its ratio capped at 2.97x, then shrunk 8/9 of the way toward the global 0.21x) × growth 0.99 (TVL −2.2% in seven days) × maturity 0.82 × breadth 1.09 (three chains) = $1.28B implied. Every factor is printed on the protocol's own board row and detail view, so the arithmetic can be checked without trusting this paragraph.</p>
+    <p><strong>What this board does not claim.</strong> Risk Curators' 0.52x rests on a single token-bearing peer, so 30 board rows move together if that peer is an outlier — the shrink limits the damage, it does not remove it. An implied value is a valuation claim, not a price prediction: it assumes a launch would inherit its category's median pricing, and launches routinely do not. “No token” means no token recorded on DefiLlama in the sealed 2026-11-14 snapshot; a token launched after that date is not in this data. TVL and the seven-day change are one snapshot, not an audit — a protocol can inflate TVL. Readiness is a triage score, not a return forecast.</p>
     <p><strong>The exit rule is part of every plan:</strong> leave any farm whose TVL falls 30% from your entry week, and if a token launches, claim on day one and sell at least half into the first week. A radar that never tells you to leave is a trap, not a tool.</p>
     <p class="fine" id="sourceLine"></p>
   </section>

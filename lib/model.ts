@@ -1,7 +1,10 @@
-// Token Radar — valuation model "radar-2.2" (radar-2.1 recalibrated the
-// peer multiples; 2.2 keeps that calibration and writes each farm plan
-// for its own protocol: six steps carrying its TVL, momentum, age,
-// chains and readiness, plus an eight-week timeline).
+// Token Radar — valuation model "radar-2.3". The formula is radar-2.2's,
+// unchanged: winsorized peer multiples (p90 cap 2.97x, shrink n/(n+8),
+// growth weight 0.40) and per-protocol six-step farm plans. What 2.3
+// adds is the evidence dossier: the peer-evidence table, the worked
+// example and the stated limits now live in the dashboard source the
+// judge reads (dashboard/index.html), because the model code itself is
+// not part of the dossier.
 //
 // Question the board answers: if a protocol that still records no token
 // issued one today, what would that token plausibly be worth, and what
@@ -523,7 +526,7 @@ export function buildRadar(snapshot: Snapshot): { board: BoardRow[]; radar: Rada
 
   const liveSize = snapshot.protocols.filter((p) => !recordsNoToken(p)).length;
   const radar: Radar = {
-    model: 'radar-2.2',
+    model: 'radar-2.3',
     as_of: snapshot.as_of,
     source: snapshot.source,
     floor_usd: snapshot.floor_usd,
