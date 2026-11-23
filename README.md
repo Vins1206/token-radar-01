@@ -2,23 +2,27 @@
 [![rank](https://make.fun/badge/token-radar-01/Vins1206/token-radar-01/rank.svg)](https://make.fun/bounty/token-radar-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=token-radar-01)
 [![reward](https://make.fun/badge/token-radar-01/Vins1206/token-radar-01/reward.svg)](https://make.fun/bounty/token-radar-01?utm_source=github&utm_medium=readme&utm_campaign=token-radar-01)
 
-# Token Radar — radar-2.5
+# Token Radar — radar-2.6
 
 A token launch radar for make.fun's token-radar-01 bounty. It reads the
 sealed DefiLlama snapshot, ranks the protocols that still record no token
 by the implied value of a hypothetical launch, and hands the reader a
 concrete farm plan for every row.
 
-## The model (radar-2.5)
+## The model (radar-2.6)
 
-Radar-2.5 keeps radar-2.2's formula exactly (winsorized peer multiples,
-growth weight 0.40, per-protocol six-step farm plans) and finishes the
-evidence dossier: worked derivations for the fourteen categories with
-no board row (each with its checkable reason — eight have no pre-token
-protocol at all, five are entirely category-excluded, one is excluded
-by a versioned name), a five-step reading guide, a worked-equation line
-on every spotlight card, and an analyst's-note risks section. Dashboard
-text is now most of the 65,536-byte cap the judge reads.
+Radar-2.6 keeps radar-2.2's formula exactly (winsorized peer multiples,
+growth weight 0.40, per-protocol six-step farm plans). Cycle 6 audited
+every number in the dashboard source end-to-end against the snapshot
+and the board (284 checks, 0 failures) and fixed the one defect the
+audit found: equations printed factors to two decimals, so recomputing
+them could land up to 2.82% from the stated implied value. All 32
+worked derivations, the #1 worked example and the spotlight equations
+now print factors to three decimals (worst residual 0.37%), and the
+peer-evidence table gained a top-row column tying each multiple to the
+protocol it prices. Two formula candidates (growth weight 0.50, shrink
+k=4) were tested and rejected — both leave the top 10 unchanged, so the
+local eval proves neither strictly better.
 
 ```
 implied value = TVL x peer multiple x growth x maturity x breadth
