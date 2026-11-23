@@ -54,6 +54,9 @@
       '<p class="spot-meta">' + esc(r.category) + ' · TVL ' + fmt(r.tvl_usd) + ' · ' +
       r.chains.slice(0, 3).map(esc).join(', ') + '</p>' +
       '<span class="spot-val">' + fmt(r.implied_value_usd) + '</span>' +
+      '<p class="spot-eq">' + fmt(r.tvl_usd) + ' × ' + r.peer_multiple.toFixed(2) + ' × ' +
+      r.growth_factor.toFixed(2) + ' × ' + r.maturity_factor.toFixed(2) + ' × ' +
+      r.breadth_factor.toFixed(2) + ' = ' + fmt(r.implied_value_usd) + '</p>' +
       '<p class="spot-why"><b>Why this rank:</b> ' + esc(shortWhy(r)) + '</p>' +
       '<p class="spot-why"><b>First move:</b> ' + esc(r.farm_steps[0]) + '</p>';
     card.addEventListener('click', function () { openDetail(r.slug, true); });

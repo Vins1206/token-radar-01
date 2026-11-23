@@ -20,13 +20,23 @@ h2{margin:0 0 4px;font-size:20px}
 .spot-sub{margin:0 0 10px;color:var(--dim)}
 .spot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .spot-card{background:linear-gradient(180deg,#132243,#0e1830);border:1px solid var(--green);
-  border-radius:var(--radius);padding:10px 12px 9px;cursor:pointer}
+  border-radius:var(--radius);padding:8px 12px 7px;cursor:pointer}
+.spot-eq{color:var(--amber);font-size:12.5px;font-weight:700;margin:4px 0 0}
 .spot-card:hover{border-color:var(--amber)}
 .spot-rank{color:var(--green);font-weight:800;font-size:12px;letter-spacing:.12em}
 .spot-name{font-size:16px;font-weight:700;margin:3px 0 1px}
 .spot-meta{color:var(--dim);font-size:13px;margin:0 0 4px}
 .spot-val{font-size:18px;font-weight:800;color:var(--amber)}
-.spot-why{color:var(--ink);font-size:13px;margin:5px 0 0;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.spot-why{color:var(--ink);font-size:13px;margin:4px 0 0;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.guide{margin-top:26px}
+.guide h2{font-size:19px;margin:0 0 6px}
+.guide ol{color:var(--ink);font-size:14px;line-height:1.55;max-width:980px;margin:0;padding-left:22px}
+.guide li{margin:0 0 6px}
+.risks{margin-top:26px}
+.risks h2{font-size:19px;margin:0 0 6px}
+.risks ol{color:var(--ink);font-size:14px;line-height:1.55;max-width:980px;margin:0;padding-left:22px}
+.risks li{margin:0 0 8px}
+.risks .fine{color:var(--dim);font-size:12.5px}
 .board{margin-top:20px}
 .evidence{margin-top:26px}
 .evidence h2{font-size:19px;margin:0 0 6px}

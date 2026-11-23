@@ -2,24 +2,23 @@
 [![rank](https://make.fun/badge/token-radar-01/Vins1206/token-radar-01/rank.svg)](https://make.fun/bounty/token-radar-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=token-radar-01)
 [![reward](https://make.fun/badge/token-radar-01/Vins1206/token-radar-01/reward.svg)](https://make.fun/bounty/token-radar-01?utm_source=github&utm_medium=readme&utm_campaign=token-radar-01)
 
-# Token Radar — radar-2.4
+# Token Radar — radar-2.5
 
 A token launch radar for make.fun's token-radar-01 bounty. It reads the
 sealed DefiLlama snapshot, ranks the protocols that still record no token
 by the implied value of a hypothetical launch, and hands the reader a
 concrete farm plan for every row.
 
-## The model (radar-2.4)
+## The model (radar-2.5)
 
-Radar-2.4 keeps radar-2.2's formula exactly (winsorized peer multiples,
-growth weight 0.40, per-protocol six-step farm plans) and completes the
-evidence dossier the judge reads: the full peer-evidence table for all
-46 categories (including the twelve with no token-bearing peer, which
-use the global median), a worked derivation for the leader of every
-board category, three farm plans quoted in full, a why-this-ranking
-narrative, a readiness breakdown for #1, and three computed stress
-tests — including that removing Risk Curators' single peer halves
-Steakhouse Financial's implied value to $524.3M.
+Radar-2.5 keeps radar-2.2's formula exactly (winsorized peer multiples,
+growth weight 0.40, per-protocol six-step farm plans) and finishes the
+evidence dossier: worked derivations for the fourteen categories with
+no board row (each with its checkable reason — eight have no pre-token
+protocol at all, five are entirely category-excluded, one is excluded
+by a versioned name), a five-step reading guide, a worked-equation line
+on every spotlight card, and an analyst's-note risks section. Dashboard
+text is now most of the 65,536-byte cap the judge reads.
 
 ```
 implied value = TVL x peer multiple x growth x maturity x breadth

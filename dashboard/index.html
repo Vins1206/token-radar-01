@@ -9,9 +9,9 @@
 <body>
 <header class="mast">
   <div class="mast-in">
-    <p class="kicker">TOKEN RADAR · MODEL RADAR-2.4 · SNAPSHOT <span id="asOf">—</span></p>
+    <p class="kicker">TOKEN RADAR · MODEL RADAR-2.5 · SNAPSHOT <span id="asOf">—</span></p>
     <h1>Which pre-token protocol is worth farming next?</h1>
-    <p class="lede">Every protocol below still records no token on DefiLlama. The board ranks it by what a launch would be worth if its record stayed as it is — <strong>implied value = TVL × peer multiple × growth × maturity × breadth</strong> — and gives the exact farm plan, its cost, and its exit trigger. Token-bearing protocols are never rows; they are the peer evidence the multiples come from.</p>
+    <p class="lede">Read it in 30 seconds: rank is implied launch value — <strong>TVL × peer × growth × maturity × breadth</strong>. Each row prints its four factors; click one for its farm plan and exit trigger. Below the board: the peer evidence for all 46 categories, a worked derivation per category, and three stress tests. Token-bearing protocols are never rows — they are the peer evidence.</p>
     <p class="stats" id="statsLine">Loading the board…</p>
   </div>
 </header>
@@ -37,6 +37,17 @@
       </tr></thead>
       <tbody id="boardBody"></tbody>
     </table>
+  </section>
+
+  <section class="guide" aria-label="How to read this ranking">
+    <h2>How to read this ranking — five steps</h2>
+    <ol>
+      <li><strong>Rank is implied launch value, not size.</strong> Implied value = TVL × peer × growth × maturity × breadth. A smaller protocol outranks a bigger one whenever its factors say so — Polymarket (#7) over Bittensor dTAO (#14) is the live example.</li>
+      <li><strong>Every row prints its own derivation.</strong> The verdict column is the four factors in one line; the detail view shows the same factors as cards, with the full farm plan underneath.</li>
+      <li><strong>Check the multiple before trusting a row.</strong> The peer-evidence table below the board shows the peers behind every category's multiple — including the twelve categories that have no peer and use the global 0.21x.</li>
+      <li><strong>Readiness orders what to farm first.</strong> It is a triage score (scale 40, track record 25, momentum 20, breadth 15), not a return forecast; the board's range is 16–70.</li>
+      <li><strong>Every plan ends with the same exit.</strong> Leave if TVL falls 30% from your entry week; if a token launches, claim on day one and sell at least half in the first week.</li>
+    </ol>
   </section>
 
   <section class="evidence" aria-label="Peer evidence">
@@ -131,6 +142,22 @@
 <p><strong>Decentralized BTC — Chain Fusion (#114).</strong> $20.1M TVL × 0.21 global multiple (no token-bearing peers in this category) × 0.96 growth (-9.4% in seven days) × 0.92 maturity × 1.01 breadth (2 chains) = $3.9M implied. Next in the category: SUBFROST (#175) at $1.2M.</p>
 <p><strong>Uncollateralized Lending — 3Jane Lending (#144).</strong> $14.0M TVL × 0.21 global multiple (no token-bearing peers in this category) × 1.11 growth (+26.3% in seven days) × 0.80 maturity × 1.00 breadth (1 chain) = $2.7M implied.</p>
 <p><strong>Indexes — Set Protocol (#173).</strong> $10.1M TVL × 0.20 peer (3 peers) × 0.95 growth (-12.7% in seven days) × 0.72 maturity × 1.00 breadth (1 chain) = $1.4M implied.</p>
+    <h3>The fourteen categories with no board row</h3>
+    <p>Fourteen of the 46 categories carry no board row at all. Each still has a derived multiple — the multiple a protocol in that category would carry — and a checkable reason for its absence. No eligible pre-token protocol in any of these categories clears the board's early TVL cutoff of $7.2M (the lowest early row, Defa By InvoiceMate #172).</p>
+<p><strong>Collateral Management — applied 0.52x.</strong> One token-bearing peer, its ratio capped at 2.97x, shrunk to 0.52x. No pre-token protocol exists in this category in the snapshot at all.</p>
+<p><strong>Canonical Bridge — applied 0.48x.</strong> Eight peers, median 0.75x, shrunk to 0.48x. Fifteen pre-token protocols exist, but every one is category-excluded: bridges are wrapped versions of tokens that already exist, so the watchlist's own exclusion rule removes them.</p>
+<p><strong>Token Locker — applied 0.48x.</strong> Two peers, median 1.52x, shrunk to 0.48x. No pre-token protocol exists in this category in the snapshot at all.</p>
+<p><strong>Privacy — applied 0.42x.</strong> Three peers, median 0.97x, shrunk to 0.42x. Exactly one pre-token protocol exists, and its name ends in a version number, so the exclusion rule treats it as a versioned product of an existing token.</p>
+<p><strong>Decentralized AI — applied 0.42x.</strong> One peer, median 2.06x, shrunk to 0.42x. No pre-token protocol exists in this category in the snapshot at all.</p>
+<p><strong>NFT Marketplace — applied 0.41x.</strong> One peer, median 2.00x, shrunk to 0.41x. No pre-token protocol exists in this category in the snapshot at all.</p>
+<p><strong>Bridge — applied 0.36x.</strong> Six peers, median 0.56x, shrunk to 0.36x. Twenty-eight pre-token protocols exist, but every one is category-excluded for the same reason as Canonical Bridge.</p>
+<p><strong>Options — applied 0.36x.</strong> One peer, median 1.51x, shrunk to 0.36x. No pre-token protocol exists in this category in the snapshot at all.</p>
+<p><strong>AI Agents — applied 0.29x.</strong> Two peers, median 0.60x, shrunk to 0.29x. No pre-token protocol exists in this category in the snapshot at all.</p>
+<p><strong>Liquid Restaking — applied 0.21x.</strong> Two peers, median 0.18x, shrunk to 0.21x. Three pre-token protocols exist, all category-excluded as restaked versions of tokens that already exist.</p>
+<p><strong>Launchpad — applied 0.20x.</strong> One peer, median 0.13x, shrunk to 0.20x. No pre-token protocol exists in this category in the snapshot at all.</p>
+<p><strong>DOR — applied 0.20x.</strong> One peer, median 0.09x, shrunk to 0.20x. No pre-token protocol exists in this category in the snapshot at all.</p>
+<p><strong>CEX — applied 0.14x.</strong> Nine peers, median 0.07x, shrunk to 0.14x. Forty-two pre-token protocols exist, but every one is category-excluded: centralized-exchange products are not pre-token protocols in the sense this board ranks.</p>
+<p><strong>Liquid Staking — applied 0.12x.</strong> Nine peers, median 0.04x, shrunk to 0.12x. Thirty-eight pre-token protocols exist, all category-excluded as staked versions of tokens that already exist.</p>
   </section>
 
   <section class="plans" aria-label="Farm plans in full">
@@ -181,6 +208,19 @@
     <p><strong>What this board does not claim.</strong> Risk Curators' 0.52x rests on a single token-bearing peer, so 30 board rows move together if that peer is an outlier — the shrink limits the damage, it does not remove it. An implied value is a valuation claim, not a price prediction: it assumes a launch would inherit its category's median pricing, and launches routinely do not. “No token” means no token recorded on DefiLlama in the sealed 2026-11-14 snapshot; a token launched after that date is not in this data. TVL and the seven-day change are one snapshot, not an audit — a protocol can inflate TVL. Readiness is a triage score, not a return forecast.</p>
     <p><strong>The exit rule is part of every plan:</strong> leave any farm whose TVL falls 30% from your entry week, and if a token launches, claim on day one and sell at least half into the first week. A radar that never tells you to leave is a trap, not a tool.</p>
     <p class="fine" id="sourceLine"></p>
+  </section>
+
+  <section class="risks" aria-label="Risks and limits">
+    <h2>Risks &amp; limits — an analyst's note</h2>
+    <p>What could make this board wrong, in order of how much it matters. Each risk carries the number that sizes it.</p>
+    <ol>
+      <li><strong>Single-peer concentration.</strong> Twelve categories rest on exactly one token-bearing peer, and 30 board rows — the whole Risk Curators category, including ranks #1 to #3 — share that one peer's multiple. If the peer is an outlier, the category moves together. The shrink limits the damage (a 400x peer becomes 0.52x, not 2.50x), and the stress test sizes it: removing the peer halves rank #1 from $1.28B to $524.3M.</li>
+      <li><strong>TVL is unaudited.</strong> The snapshot's TVL is what protocols report through DefiLlama; a protocol can inflate TVL, and the board would rank it higher for it. No on-chain verification is part of this entry, and the seven-day change is a single window — a one-week wash of deposits reads as growth.</li>
+      <li><strong>The snapshot is one day: 2026-11-14.</strong> A token launched after that date, a TVL collapse, or a fee switch since then is not in this data. “No token” is as-of, not forever — re-check any row before farming it, and the board's own exit rule (leave at −30% TVL) is the protection against a snapshot that has gone stale.</li>
+      <li><strong>Launch pricing is an assumption, not a law.</strong> Implied value assumes a launch inherits its category's median pricing; launches routinely do not. The Polymarket stress test shows the spread: without the winsor cap its implied value would be $797.0M instead of $166.0M. Treat every implied value as a claim to argue with, not a price to expect.</li>
+      <li><strong>Costs and gas are approximations.</strong> Farm-plan costs use per-chain fee bands (Base roughly $0.05–$1.50 across a plan, Ethereum mainnet roughly $8–$35), not live quotes; a congested week costs more, and a plan that costs more than its expected points is a bad plan no matter its rank.</li>
+    </ol>
+    <p class="fine">This board is a radar, not advice: it finds candidates and prices them one way. It does not tell anyone what to buy, and it never promises a token, a drop, or a return.</p>
   </section>
 </main>
 <script src="../data.js"></script>
